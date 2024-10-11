@@ -1,0 +1,17 @@
+universal-chart:
+  applicationName: team-2-application
+  buName: bu1
+  teamName: team-2
+  namespace: team-2
+
+  deployment:
+    image:
+      name: nginxinc/nginx-unprivileged
+      tag: "1.16"
+
+  hpa:
+    enabled: true
+    minReplicas: 1
+    maxReplicas: 2
+    targetCPUUtilizationPercentage: 50
+    targetMemoryUtilizationPercentage: 50
