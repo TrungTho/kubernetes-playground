@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.applicationName }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "universal-chart.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.hpa.enabled }}
+  replicas: {{ .Values.deployment.replicaCount }}
+  {{- end }}
+
+  selector:
+    matchLabels:
+      {{- include "universal-chart.selectorLabels" . | nindent 6 }}
+
+  template:
+    metadata:
+      {{- with .Values.deployment.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        # https://learn.microsoft.com/en-us/azure/aks/workload-identity-overview?tabs=dotnet#pod-labels
+        azure.workload.identity/use: "true"
+        {{- include "universal-chart.selectorLabels" . | nindent 8 }}
+    spec:
+      serviceAccountName: {{ include "universal-chart.serviceAccountName" . }}
+
+      # https://dev.to/aws-builders/best-practices-for-securing-kubernetes-deployments-1jg6
+      securityContext: # Hardcoded to comply with policies 
+        runAsUser: 1000
+        runAsGroup: 3000
+
+      containers:
+        - name: {{ .Values.applicationName }}
+          securityContext: # Hardcoded to comply with policies
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
+          
+          image: "{{ .Values.deployment.image.name }}:{{ .Values.deployment.image.tag | default "latest" }}"
+          imagePullPolicy: Always # https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
+
+          # https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+          {{- with .Values.deployment.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12}}
+          {{- end }}
+          {{ with .Values.deployment.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          
+          # https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+          resources:
+            {{- toYaml .Values.deployment.resources | nindent 12 }}

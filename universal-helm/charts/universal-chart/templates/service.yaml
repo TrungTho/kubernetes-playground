@@ -1,0 +1,18 @@
+# https://kubernetes.io/docs/concepts/services-networking/service/
+# This will be used to expose local DNS endpoint for deployment in deployment.yaml
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: svc-{{ .Values.applicationName }}
+  namespace: {{ .Values.namespace }}
+  labels:
+    {{- include "universal-chart.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP # If team want to use a dedicated LoadBalancer, please raise request
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.targetPort }}
+      protocol: TCP
+  selector:
+    {{- include "universal-chart.selectorLabels" . | nindent 4 }}
