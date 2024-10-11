@@ -3,7 +3,9 @@
 set -xe
 
 # Install and wait until helm successfully deployed
-helm install --atomic -n universal-helm --create-namespace test-universal-helm ../charts/universal-chart;
+helm install --atomic --debug -n universal-helm \
+    --create-namespace test-universal-helm ../charts/universal-chart \
+    --set hpa.minReplicas=2;
 
 # Switch working namespace 
 kubectl config set-context --current --namespace=universal-helm;
@@ -31,9 +33,9 @@ saName=$(kubectl get pod -oyaml | yq ".items[0].spec.serviceAccountName");
 echo "mounted service account: " $saName;
 
 # Check statuses
-if [ $containerStatus1 != true ]; then exit 1; fi;
-if [ $containerStatus2 != true ]; then exit 1; fi;
+if [ $containerStatus1 != true ]; then echo "Container 1 is not healthy" && exit 1; fi;
+if [ $containerStatus2 != true ]; then echo "Container 2 is not healthy" && exit 1; fi;
 
-if [ $saName = "default" ]; then exit 1; fi;
+if [ $saName = "default" ]; then echo "Service account is incorrect" exit 1; fi;
 
 echo "Helm deployment tested succesfully!!!";

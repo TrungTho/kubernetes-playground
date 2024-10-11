@@ -15,7 +15,10 @@ permissions:
 
 jobs:
   release-chart:
+    name: Release new chart
     runs-on: ubuntu-latest
+    env:
+      chart_dir: universal-helm/charts/universal-chart
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -40,7 +43,7 @@ jobs:
       - name: Package chart
         id: package-chart
         run: |
-          result=$(helm package charts/universal-chart);
+          result=$(helm package ${{ env.chart_dir }});
           echo "result";
           packaged_chart=$(echo $result | awk '{print $NF}');
           echo "packaged_chart";

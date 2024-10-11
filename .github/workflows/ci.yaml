@@ -22,7 +22,10 @@ permissions:
 
 jobs:
   linting:
+    name: Linting
     runs-on: ubuntu-latest
+    env:
+      chart_dir: universal-helm/charts/universal-chart
     steps:
       - name: Checkout
         id: checkout-code
@@ -33,9 +36,8 @@ jobs:
       - name: Helm Lint
         id: helm-lint
         run: |
-          chart_dir=charts/universal-chart;
-          helm lint $chart_dir;
-          helm template $chart_dir;
+          helm lint ${{ env.chart_dir }};
+          helm template ${{ env.chart_dir }};
 
       - name: Prepare values
         id: prepare-vars
@@ -50,7 +52,7 @@ jobs:
       - name: Get PR version
         id: get-pr-version
         run: |
-          pr_version=$(cat charts/universal-chart/Chart.yaml | yq ".version");
+          pr_version=$(cat ${{ env.chart_dir }}/Chart.yaml | yq ".version");
           echo "PR chart version: $pr_version";
           echo "pr_version=$pr_version" >> $GITHUB_OUTPUT
 
@@ -69,6 +71,7 @@ jobs:
           fi
 
   testing:
+    name: Testing
     runs-on: ubuntu-latest
     needs: [linting]
     steps:
@@ -91,4 +94,4 @@ jobs:
 
       - name: Deploy Helm chart & verify components
         run: . test-helm-deployment.sh
-        working-directory: ./universal-helm/test
+        working-directory: ./universal-helm/universal-helm/test
