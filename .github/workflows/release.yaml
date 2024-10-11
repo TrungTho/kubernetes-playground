@@ -1,0 +1,56 @@
+name: Release Charts
+
+on:
+  workflow_run:
+    workflows: [Linting and Testing]
+    types: [completed]
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  contents: write
+  pull-requests: write
+  packages: write
+
+jobs:
+  release-chart:
+    name: Release new chart
+    runs-on: ubuntu-latest
+    env:
+      chart_dir: universal-helm/charts/universal-chart
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+
+      - name: Prepare values
+        id: prepare-vars
+        run: |
+          owner=$(cut -d '/' -f 1 <<< "$GITHUB_REPOSITORY");
+          echo "owner=$owner" >> $GITHUB_OUTPUT
+          repo=$(cut -d '/' -f 2 <<< "$GITHUB_REPOSITORY");
+          echo "repo=$repo" >> $GITHUB_OUTPUT          
+          token=${{ secrets.GITHUB_TOKEN }};
+          echo "token=$token" >> $GITHUB_OUTPUT
+
+      - name: Package chart
+        id: package-chart
+        run: |
+          result=$(helm package ${{ env.chart_dir }});
+          echo "result";
+          packaged_chart=$(echo $result | awk '{print $NF}');
+          echo "packaged_chart";
+          echo "packaged_chart=$packaged_chart" >> $GITHUB_OUTPUT
+
+      - name: Publish chart to OCI-GHCR
+        run: |
+          registry_endpoint="ghcr.io/TrungTho"
+          helm registry login $registry_endpoint --username no-need --password ${{ steps.prepare-vars.outputs.token}} && \
+          helm push ${{ steps.package-chart.outputs.packaged_chart }} oci://$registry_endpoint/k8s-playground

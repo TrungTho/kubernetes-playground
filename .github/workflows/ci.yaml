@@ -1,0 +1,97 @@
+name: Linting and Testing
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "universal-helm/charts/**"
+      - "universal-helm/test/**"
+  pull_request:
+    branches:
+      - "*"
+    paths:
+      - "universal-helm/charts/**"
+      - "universal-helm/test/**"
+
+permissions:
+  id-token: write
+  contents: write
+  pull-requests: write
+  packages: write
+
+jobs:
+  linting:
+    name: Linting
+    runs-on: ubuntu-latest
+    env:
+      chart_dir: universal-helm/charts/universal-chart
+    steps:
+      - name: Checkout
+        id: checkout-code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Helm Lint
+        id: helm-lint
+        run: |
+          helm lint ${{ env.chart_dir }};
+          helm template ${{ env.chart_dir }};
+
+      - name: Prepare values
+        id: prepare-vars
+        run: |
+          owner=$(cut -d '/' -f 1 <<< "$GITHUB_REPOSITORY");
+          echo "owner=$owner" >> $GITHUB_OUTPUT
+          repo=$(cut -d '/' -f 2 <<< "$GITHUB_REPOSITORY");
+          echo "repo=$repo" >> $GITHUB_OUTPUT          
+          token=${{ secrets.GITHUB_TOKEN }};
+          echo "token=$token" >> $GITHUB_OUTPUT
+
+      - name: Get PR version
+        id: get-pr-version
+        run: |
+          pr_version=$(cat ${{ env.chart_dir }}/Chart.yaml | yq ".version");
+          echo "PR chart version: $pr_version";
+          echo "pr_version=$pr_version" >> $GITHUB_OUTPUT
+
+      - name: Check chart version
+        id: check-exist
+        run: |
+          # Login to oci ghcr
+          registry_endpoint="ghcr.io/TrungTho"
+          helm registry login $registry_endpoint --username  ${{ steps.prepare-vars.outputs.owner }} --password ${{ steps.prepare-vars.outputs.token }} && \
+
+          # Try to pull if there is an existing version of chart
+          if (helm pull oci://$registry_endpoint/test/universal-chart --version ${{ steps.get-pr-version.outputs.pr_version }}); then
+            echo "::error::Chart version $pr_version already existed!" && exit 1;
+          else
+            echo "Chart version $pr_version didn't exist!"
+          fi
+
+  testing:
+    name: Testing
+    runs-on: ubuntu-latest
+    needs: [linting]
+    steps:
+      - name: Checkout Helm Kind
+        uses: actions/checkout@v4
+        with:
+          repository: helm/kind-action
+          ref: v1.10.0
+          path: helm-kind
+
+      - name: Set up Kind
+        uses: ./helm-kind/
+
+      - name: Checkout
+        id: checkout-code
+        uses: actions/checkout@v4
+        with:
+          path: universal-helm
+          fetch-depth: 0
+
+      - name: Deploy Helm chart & verify components
+        run: . test-helm-deployment.sh
+        working-directory: ./universal-helm/universal-helm/test

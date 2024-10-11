@@ -1,0 +1,79 @@
+# Default values for universal-chart.
+# This is a YAML-formatted file.
+# Please use this file as a reference
+
+# === General values ===
+applicationName: ultimate-app
+buName: bu1
+teamName: team-a
+namespace: universal-helm
+
+# https://learn.microsoft.com/en-us/azure/aks/csi-secrets-store-identity-access
+azure:
+  workloadIdentity:
+    userAssignedClientId: abc123 # Client ID of workload identity
+  keyvaultIntegration:
+    enabled: false # Set to false to disable
+    kvName: kv-abc
+    cloudName: "" # Optional, leave it empty to use default value
+    tenantId: tenant-124
+    object:
+      array:
+        - |
+          objectName: secret1             # Set to the name of your secret
+          objectType: secret              # object types: secret, key, or cert
+          objectVersion: ""               # [OPTIONAL] object versions, default to latest if empty
+        - |
+          objectName: key1                # Set to the name of your key
+          objectType: key
+          objectVersion: ""
+
+serviceAccount:
+  # Optional annotations to add to the service account
+  annotations: {}
+
+# Required all
+deployment:
+  replicaCount: 1 # Number of replica, will be overridden if HPA is enabled
+  image:
+    name: nginxinc/nginx-unprivileged # Please include registry path also, otherwise docker.io/library will be use
+    tag: "" # Default will be latest tag
+
+  # Pod annotations are optional, in case you want to configure workload identity values
+  # You can specify them as instruction here: https://learn.microsoft.com/en-us/azure/aks/workload-identity-overview?tabs=dotnet#pod-annotations
+  podAnnotations: {}
+
+  # https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+  livenessProbe: # Use {} (empty object) to disable liveness check
+    httpGet:
+      path: /
+      port: 8080
+    initialDelaySeconds: 10
+    periodSeconds: 10
+    failureThreshold: 4
+
+  readinessProbe: {} # Same as LivenessProbe
+
+  # https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+  resources:
+    requests:
+      cpu: 10m
+      memory: 128Mi
+    limits:
+      cpu: 200m
+      memory: 256Mi
+
+# https://kubernetes.io/docs/concepts/services-networking/service/
+# Required all
+service:
+  port: 80
+  targetPort: 8080
+
+# https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+# If enabled, HPA will override fixed replica number and scale bases on resource usages
+hpa:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 70
+  targetMemoryUtilizationPercentage: 80
