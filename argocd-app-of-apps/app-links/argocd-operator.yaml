@@ -14,7 +14,7 @@ spec:
   source:
     path: argocd-app-of-apps/app-links
     repoURL: https://github.com/TrungTho/kubernetes-playground
-    targetRevision: chore/reconfigure-argocd
+    targetRevision: HEAD
     directory:
       recurse: true
   syncPolicy:
