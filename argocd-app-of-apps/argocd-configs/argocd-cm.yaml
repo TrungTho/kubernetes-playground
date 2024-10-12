@@ -7,4 +7,4 @@ metadata:
   name: argocd-cm
   namespace: argocd
 data:
-  timeout.reconciliation: 10s
+  timeout.reconciliation: 30s
