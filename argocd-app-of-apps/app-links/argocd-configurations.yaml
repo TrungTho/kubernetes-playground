@@ -13,7 +13,7 @@ spec:
   source:
     path: argocd-app-of-apps/argocd-configs
     repoURL: https://github.com/TrungTho/kubernetes-playground
-    targetRevision: HEAD
+    targetRevision: chore/reconfigure-argocd
   syncPolicy:
     automated:
       prune: true
