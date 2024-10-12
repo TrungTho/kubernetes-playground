@@ -1,11 +1,9 @@
-name: Release Charts
+name: Release Chart
 
 on:
   workflow_run:
     workflows: [Linting and Testing]
     types: [completed]
-    branches:
-      - main
 
 permissions:
   id-token: write
@@ -53,4 +51,4 @@ jobs:
         run: |
           registry_endpoint="ghcr.io/TrungTho"
           helm registry login $registry_endpoint --username no-need --password ${{ steps.prepare-vars.outputs.token}} && \
-          helm push ${{ steps.package-chart.outputs.packaged_chart }} oci://$registry_endpoint/k8s-playground
+          helm push ${{ steps.package-chart.outputs.packaged_chart }} oci://$registry_endpoint/playground
