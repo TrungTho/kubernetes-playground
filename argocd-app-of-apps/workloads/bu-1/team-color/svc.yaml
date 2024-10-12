@@ -11,6 +11,5 @@ spec:
       protocol: TCP
       targetPort: 8080
   selector:
-    app.kubernetes.io/instance: team-nginx
     run: server
-  type: NodePort
+  type: ClusterIP
