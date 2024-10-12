@@ -4,6 +4,8 @@ on:
   workflow_run:
     workflows: [Linting and Testing]
     types: [completed]
+    branches:
+      - main
 
 permissions:
   id-token: write
@@ -49,6 +51,6 @@ jobs:
 
       - name: Publish chart to OCI-GHCR
         run: |
-          registry_endpoint="ghcr.io/TrungTho"
+          registry_endpoint="ghcr.io/trungtho/kubernetes-playground"
           helm registry login $registry_endpoint --username no-need --password ${{ steps.prepare-vars.outputs.token}} && \
-          helm push ${{ steps.package-chart.outputs.packaged_chart }} oci://$registry_endpoint/playground
+          helm push ${{ steps.package-chart.outputs.packaged_chart }} oci://$registry_endpoint
