@@ -5,13 +5,11 @@ metadata:
     app.kubernetes.io/instance: team-nginx
     run: server
   name: server
-  namespace: team-nginx
 spec:
   ports:
     - port: 80
       protocol: TCP
       targetPort: 8080
   selector:
-    app.kubernetes.io/instance: team-nginx
     run: server
-  type: NodePort
+  type: ClusterIP

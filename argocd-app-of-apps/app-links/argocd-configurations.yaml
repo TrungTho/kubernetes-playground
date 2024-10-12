@@ -11,15 +11,17 @@ spec:
     server: https://kubernetes.default.svc
   project: default
   source:
-    path: argocd-configs
-    repoURL: https://github.com/thotran-mck/argocd-centralized-deployment.git
+    path: argocd-app-of-apps/argocd-configs
+    repoURL: https://github.com/TrungTho/kubernetes-playground
     targetRevision: HEAD
+    directory:
+      recurse: true
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
-      - CreateNamespace=true
-      - PrunePropagationPolicy=foreground
+      - Validate=false
+      - ServerSideApply=true
       - PruneLast=true
       - ApplyOutOfSyncOnly=true

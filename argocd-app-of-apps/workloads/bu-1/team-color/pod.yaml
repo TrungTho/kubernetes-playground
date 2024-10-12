@@ -4,7 +4,6 @@ metadata:
   labels:
     run: server
   name: server
-  namespace: team-nginx
 spec:
   serviceAccountName: team-nginx-sa
   containers:
