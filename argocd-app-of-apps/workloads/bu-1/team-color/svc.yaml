@@ -5,7 +5,6 @@ metadata:
     app.kubernetes.io/instance: team-nginx
     run: server
   name: server
-  namespace: team-nginx
 spec:
   ports:
     - port: 80
