@@ -1,0 +1,31 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  name: kong
+  namespace: argocd
+spec:
+  destination:
+    namespace: kong
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    chart: ingress
+    repoURL: https://charts.konghq.com
+    targetRevision: 0.*.* # any version of first major release
+    helm:
+      releaseName: ingress
+      # Because of local usage, modify the service type to NodePort instead of using LoadBalancer
+      parameters:
+        - name: "controller.proxy.type"
+          value: NodePort
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - Validate=false
+      - ServerSideApply=true
+      - PruneLast=true
+      - ApplyOutOfSyncOnly=true

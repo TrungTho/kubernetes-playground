@@ -1,0 +1,19 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: http-color
+  annotations:
+    konghq.com/strip-path: "true"
+spec:
+  parentRefs:
+    - name: kong-gateway
+      namespace: gateway-api
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /color
+      backendRefs:
+        - name: server
+          kind: Service
+          port: 80
