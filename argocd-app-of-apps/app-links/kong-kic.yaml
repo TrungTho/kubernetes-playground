@@ -16,6 +16,10 @@ spec:
     targetRevision: 0.*.* # any version of first major release
     helm:
       releaseName: ingress
+      # Because of local usage, modify the service type to NodePort instead of using LoadBalancer
+      parameters:
+        - name: "controller.proxy.type"
+          value: NodePort
   syncPolicy:
     automated:
       prune: true
