@@ -39,4 +39,3 @@ if [ $containerStatus2 != true ]; then echo "Container 2 is not healthy" && exit
 if [ $saName = "default" ]; then echo "Service account is incorrect" exit 1; fi;
 
 echo "Helm deployment tested succesfully!!!";
-

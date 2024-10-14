@@ -59,11 +59,11 @@ jobs:
         id: check-exist
         run: |
           # Login to oci ghcr
-          registry_endpoint="ghcr.io/TrungTho"
+          registry_endpoint="ghcr.io/trungtho/kubernetes-playground"
           helm registry login $registry_endpoint --username  ${{ steps.prepare-vars.outputs.owner }} --password ${{ steps.prepare-vars.outputs.token }} && \
 
           # Try to pull if there is an existing version of chart
-          if (helm pull oci://$registry_endpoint/test/universal-chart --version ${{ steps.get-pr-version.outputs.pr_version }}); then
+          if (helm pull oci://$registry_endpoint/universal-chart --version ${{ steps.get-pr-version.outputs.pr_version }}); then
             echo "::error::Chart version $pr_version already existed!" && exit 1;
           else
             echo "Chart version $pr_version didn't exist!"
