@@ -2,8 +2,6 @@ name: Linting and Testing
 
 on:
   push:
-    branches:
-      - main
     paths:
       - "universal-helm/charts/**"
       - "universal-helm/test/**"
@@ -48,6 +46,7 @@ jobs:
           echo "repo=$repo" >> $GITHUB_OUTPUT          
           token=${{ secrets.GITHUB_TOKEN }};
           echo "token=$token" >> $GITHUB_OUTPUT
+          echo test value ${{github.action_path}}
 
       - name: Get PR version
         id: get-pr-version
