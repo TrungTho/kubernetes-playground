@@ -1,0 +1,34 @@
+# Entry point for app of apps pattern
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  name: istiod
+  namespace: argocd
+spec:
+  destination:
+    namespace: istio-system
+    server: https://kubernetes.default.svc
+  project: default
+  sources:
+    - chart: base
+      repoURL: https://istio-release.storage.googleapis.com/charts
+      targetRevision: 1.23.*
+    - chart: istiod
+      repoURL: https://istio-release.storage.googleapis.com/charts
+      targetRevision: 1.23.*
+    # - chart: gateway
+    #   repoURL: https://istio-release.storage.googleapis.com/charts
+    #   targetRevision: 1.23.*
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - Validate=false
+      - ServerSideApply=true
+      - PruneLast=true
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
