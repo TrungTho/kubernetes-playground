@@ -25,7 +25,7 @@ jobs:
     name: Linting
     runs-on: ubuntu-latest
     env:
-      chart_dir: universal-helm/charts/universal-chart
+      CHART_DIR: universal-helm/charts
     steps:
       - name: Checkout
         id: checkout-code
@@ -36,8 +36,9 @@ jobs:
       - name: Helm Lint
         id: helm-lint
         run: |
-          helm lint ${{ env.chart_dir }};
-          helm template ${{ env.chart_dir }};
+          cd ${{ env.CHART_DIR }};
+          helm lint *;
+          helm template *;
 
       - name: Prepare values
         id: prepare-vars
@@ -49,26 +50,37 @@ jobs:
           token=${{ secrets.GITHUB_TOKEN }};
           echo "token=$token" >> $GITHUB_OUTPUT
 
-      - name: Get PR version
-        id: get-pr-version
+      - name: Get changes files
+        id: get-changes
         run: |
-          pr_version=$(cat ${{ env.chart_dir }}/Chart.yaml | yq ".version");
-          echo "PR chart version: $pr_version";
-          echo "pr_version=$pr_version" >> $GITHUB_OUTPUT
+          changed_files=`git diff --name-only HEAD origin/main | tr '\n' ' '`;
+          echo "changed_files changes" $changed_files;
+          echo "changed_files=$changed_files" >> $GITHUB_OUTPUT
 
       - name: Check chart version
         id: check-exist
+        env:
+          CHANGED_FILES: ${{ steps.get-changes.outputs.changed_files }}
+          REGISTRY_ENDPOINT: "ghcr.io/trungtho/kubernetes-playground"
         run: |
           # Login to oci ghcr
-          registry_endpoint="ghcr.io/trungtho/kubernetes-playground"
-          helm registry login $registry_endpoint --username  ${{ steps.prepare-vars.outputs.owner }} --password ${{ steps.prepare-vars.outputs.token }} && \
+          helm registry login ${{ env.REGISTRY_ENDPOINT }} --username  ${{ steps.prepare-vars.outputs.owner }} --password ${{ steps.prepare-vars.outputs.token }} && \
 
-          # Try to pull if there is an existing version of chart
-          if (helm pull oci://$registry_endpoint/universal-chart --version ${{ steps.get-pr-version.outputs.pr_version }}); then
-            echo "::error::Chart version $pr_version already existed!" && exit 1;
-          else
-            echo "Chart version $pr_version didn't exist!"
-          fi
+          # Loop through all chart, if there are changes -> check version
+          for chart_dir in universal-helm/charts/*                                                                   ✔  ▼  16:07:20 
+          do
+            echo "=== evaluate chart $chart_dir ===";
+            if echo ${{ env.CHANGED_FILES }} | grep $chart_dir; then
+              pr_version=$(cat $chart_dir/Chart.yaml | yq ".version");
+              if (helm pull oci://${{ env.REGISTRY_ENDPOINT }}/$chart_dir --version $pr_version); then
+                echo "::error::Chart $chart_dir with version $pr_version is already existed!" && exit 1;
+              else
+                echo "::notice::Chart $chart_dir with version $pr_version didn't exist, can start releasing"
+              fi
+            else
+              echo "::notice::Chart $chart_dir didn't change";
+            fi
+          done
 
   testing:
     name: Testing
@@ -92,6 +104,7 @@ jobs:
           path: universal-helm
           fetch-depth: 0
 
+      # Only test the main chart for now, other chart can also be tested by replicating this step
       - name: Deploy Helm chart & verify components
         run: . test-helm-deployment.sh
         working-directory: ./universal-helm/universal-helm/test
