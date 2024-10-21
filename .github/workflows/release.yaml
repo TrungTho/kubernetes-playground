@@ -55,10 +55,11 @@ jobs:
           helm registry login ${{ env.REGISTRY_ENDPOINT }} --username no-need --password ${{ steps.prepare-vars.outputs.token}} && \
 
           cd ${{ env.CHART_DIR }};
+          ls;
           for chart in *
           do
             if echo ${{ env.CHANGED_FILES }} | grep $chart; then   
-              result=$(helm package .);
+              result=$(helm package $chart);
               packaged_chart=$(echo $result | awk '{print $NF}');
               echo "$packaged_chart";
               helm push $packaged_chart oci://${{ env.REGISTRY_ENDPOINT }};
