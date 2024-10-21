@@ -2,4 +2,4 @@ apiVersion: v2
 name: universal-chart
 description: The universal helm chart to be used as dependency
 type: application
-version: 1.0.0 # will be chart release version
+version: 1.0.2 # will be chart release version
