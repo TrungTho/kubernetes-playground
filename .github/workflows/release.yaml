@@ -57,7 +57,7 @@ jobs:
           cd ${{ env.CHART_DIR }};
           for chart in *
           do
-            if echo ${{ env.CHANGED_FILES }} | grep $chart_dir; then   
+            if echo ${{ env.CHANGED_FILES }} | grep $chart; then   
               result=$(helm package .);
               packaged_chart=$(echo $result | awk '{print $NF}');
               echo "$packaged_chart";
