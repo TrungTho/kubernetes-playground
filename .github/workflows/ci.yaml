@@ -75,10 +75,10 @@ jobs:
               if (helm pull oci://${{ env.REGISTRY_ENDPOINT }}/$chart_dir --version $pr_version); then
                 echo "::error::Chart $chart_dir with version $pr_version is already existed!" && exit 1;
               else
-                echo "::notice::Chart $chart_dir with version $pr_version didn't exist, can start releasing"
+                echo "::notice::Chart $chart_dir with version $pr_version doesn't exist, can start releasing"
               fi
             else
-              echo "::notice::Chart $chart_dir didn't change";
+              echo "::notice::Chart $chart_dir doesn't change";
             fi
           done
 
