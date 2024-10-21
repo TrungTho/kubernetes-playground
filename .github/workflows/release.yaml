@@ -43,7 +43,7 @@ jobs:
       - name: Get changes files
         id: get-changes
         run: |
-          changed_files=`git diff --name-only HEAD origin/main | tr '\n' ' '`;
+          changed_files=`git diff --name-only HEAD HEAD~ | tr '\n' ' '`;
           echo "changed_files changes" $changed_files;
           echo "changed_files=$changed_files" >> $GITHUB_OUTPUT
 
@@ -52,7 +52,6 @@ jobs:
           CHANGED_FILES: ${{ steps.get-changes.outputs.changed_files }}
           REGISTRY_ENDPOINT: "ghcr.io/trungtho/kubernetes-playground"
         run: |
-
           helm registry login ${{ env.REGISTRY_ENDPOINT }} --username no-need --password ${{ steps.prepare-vars.outputs.token}} && \
 
           cd ${{ env.CHART_DIR }};
