@@ -1,0 +1,20 @@
+# Source: kiali-server/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: kiali-nodeport
+  namespace: "istio-system"
+spec:
+  ports:
+    - name: http
+      appProtocol: http
+      protocol: TCP
+      port: 20001
+    - name: http-metrics
+      appProtocol: http
+      protocol: TCP
+      port: 9090
+  type: NodePort
+  selector:
+    app.kubernetes.io/name: kiali
+    app.kubernetes.io/instance: kiali

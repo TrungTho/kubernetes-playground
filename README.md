@@ -13,6 +13,7 @@ Entrypoint for all application, including ArgoCD operator
 ### argocd-configs
 
 All the customized configuration for cluster and argocd specifically
+For example we want to patch, amend a resource, just put them here and argo will pick that up
 
 ### workloads
 

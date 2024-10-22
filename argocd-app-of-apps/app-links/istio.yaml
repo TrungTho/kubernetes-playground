@@ -1,0 +1,41 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  name: istiod
+  namespace: argocd
+spec:
+  destination:
+    namespace: istio-system
+    server: https://kubernetes.default.svc
+  project: default
+  sources:
+    - chart: base # pre-set up chart with CRDs
+      repoURL: https://istio-release.storage.googleapis.com/charts
+      targetRevision: 1.23.*
+    - chart: istiod
+      repoURL: https://istio-release.storage.googleapis.com/charts
+      targetRevision: 1.23.*
+      helm:
+        parameters:
+          - name: "pilot.resources.requests.memory"
+            value: 300Mi
+          - name: "pilot.resources.requests.cpu"
+            value: 100m
+    - path: samples/addons
+      repoURL: https://github.com/istio/istio
+      targetRevision: release-1.23
+      directory:
+        recurse: false
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - Validate=false
+      - ServerSideApply=true
+      - PruneLast=true
+      - ApplyOutOfSyncOnly=true
+      - CreateNamespace=true
