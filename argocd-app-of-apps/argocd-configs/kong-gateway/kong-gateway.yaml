@@ -4,7 +4,7 @@ metadata:
   name: kong-gateway
   namespace: gateway-api
 spec:
-  gatewayClassName: kong-gw-class
+  gatewayClassName: kong
   listeners:
     - name: proxy
       port: 80
