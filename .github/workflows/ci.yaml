@@ -67,7 +67,7 @@ jobs:
           helm registry login ${{ env.REGISTRY_ENDPOINT }} --username  ${{ steps.prepare-vars.outputs.owner }} --password ${{ steps.prepare-vars.outputs.token }} && \
 
           # Loop through all chart, if there are changes -> check version
-          for chart_dir in universal-helm/charts/*                                                                   ✔  ▼  16:07:20 
+          for chart_dir in universal-helm/charts/*                                                                  
           do
             echo "=== evaluate chart $chart_dir ===";
             if echo ${{ env.CHANGED_FILES }} | grep $chart_dir; then
