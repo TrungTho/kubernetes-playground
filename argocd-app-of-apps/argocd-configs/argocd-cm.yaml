@@ -6,5 +6,5 @@ metadata:
     app.kubernetes.io/part-of: argocd
   name: argocd-cm
   namespace: argocd
-data:
-  timeout.reconciliation: 30s
+# data:
+# timeout.reconciliation: 30s
