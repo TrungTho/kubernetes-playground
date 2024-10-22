@@ -27,6 +27,7 @@ spec:
       repoURL: https://github.com/istio/istio
       targetRevision: release-1.23
       directory:
+        jsonnet: {}
         recurse: false
 
   syncPolicy:
