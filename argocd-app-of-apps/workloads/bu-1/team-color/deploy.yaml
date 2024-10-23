@@ -1,0 +1,23 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: color-server
+  name: color-server
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: color-server
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: color-server
+    spec:
+      serviceAccountName: team-nginx-sa
+      containers:
+        - image: kodekloud/simple-webapp
+          name: simple-webapp
+          resources: {}
+status: {}
