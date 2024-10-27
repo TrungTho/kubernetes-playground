@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: payment-gateway
+  name: payment-gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: payment-gateway
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        app: payment-gateway
+    spec:
+      containers:
+        - image: node:18-alpine
+          imagePullPolicy: IfNotPresent
+          command: ["/usr/local/bin/node", "/etc/code/node-server.js"]
+          name: test-server
+          resources:
+            limits:
+              memory: 100Mi
+              cpu: 50m
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/code
+          env:
+            - name: MY_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: MY_POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: EXTERNAL_SERVERS
+              value: "https://httpbin.org/anything"
+            - name: SLEEP_DURATION
+              value: "10000" # 10 seconds
+      volumes:
+        - name: config-volume
+          configMap:
+            name: node-server-code
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: payment-gateway
+spec:
+  selector:
+    app: payment-gateway
+  ports:
+    - port: 80
+      targetPort: 80
+  type: ClusterIP
