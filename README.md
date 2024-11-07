@@ -22,3 +22,13 @@ Manifests of testing applications, each sub-directory here should have 1 registr
 ## universal-helm
 
 Helm template with the idea of build once, reuse every where 😀, which will be used as a dependency chart to reduce duplication and centralize management & maintenance to one source of truth
+
+
+### Roadmap:
+- [x] argocd app for apps repository structure
+- [x] gateway api integration and kong installation
+- [x] universal helm chart for re-using purpose
+- [x] istio install & configuration with argocd monitoring
+- [x] playground application namespace with pods for istio testing
+- [] cert-manager integration with TLS set up for team-color application
+- [] upgrade to istio v1.24 for ambient mode (sidecar less)
